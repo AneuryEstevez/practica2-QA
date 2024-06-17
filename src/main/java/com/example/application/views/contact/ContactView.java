@@ -2,9 +2,11 @@ package com.example.application.views.contact;
 
 import com.example.application.views.MainLayout;
 import com.vaadin.flow.component.Composite;
+import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.html.H3;
+import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.orderedlayout.FlexComponent.Alignment;
 import com.vaadin.flow.component.orderedlayout.FlexComponent.JustifyContentMode;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
@@ -24,17 +26,32 @@ import jakarta.annotation.security.PermitAll;
 @PermitAll
 public class ContactView extends Composite<VerticalLayout> {
 
+    private final TextField nameField;
+    private final EmailField emailField;
+    private final TextArea messageField;
+
     public ContactView() {
         VerticalLayout layoutColumn2 = new VerticalLayout();
         H3 h3 = new H3();
         HorizontalLayout layoutRow = new HorizontalLayout();
-        TextField textField = new TextField();
+        nameField = new TextField();
+        nameField.setId("nameInput");
+        nameField.setRequired(true);
+        nameField.setErrorMessage("Name is required");
+
         HorizontalLayout layoutRow2 = new HorizontalLayout();
-        EmailField emailField = new EmailField();
-        TextArea textArea = new TextArea();
+        emailField = new EmailField();
+        emailField.setId("emailInput");
+        emailField.setRequired(true);
+        emailField.setErrorMessage("Email is required");
+
+        messageField = new TextArea();
+        messageField.setId("messageInput");
+        messageField.setRequired(true);
+        messageField.setErrorMessage("Message is required");
         HorizontalLayout layoutRow3 = new HorizontalLayout();
-        Button buttonPrimary = new Button();
-        Button buttonSecondary = new Button();
+        Button sendButton = new Button();
+
         getContent().setWidth("100%");
         getContent().getStyle().set("flex-grow", "1");
         getContent().setJustifyContentMode(JustifyContentMode.START);
@@ -49,8 +66,8 @@ public class ContactView extends Composite<VerticalLayout> {
         layoutRow.addClassName(Gap.MEDIUM);
         layoutRow.setWidth("100%");
         layoutRow.getStyle().set("flex-grow", "1");
-        textField.setLabel("Name");
-        textField.setWidth("100%");
+        nameField.setLabel("Name");
+        nameField.setWidth("100%");
         layoutRow2.setWidthFull();
         layoutColumn2.setFlexGrow(1.0, layoutRow2);
         layoutRow2.addClassName(Gap.MEDIUM);
@@ -58,25 +75,73 @@ public class ContactView extends Composite<VerticalLayout> {
         layoutRow2.getStyle().set("flex-grow", "1");
         emailField.setLabel("Email");
         emailField.getStyle().set("flex-grow", "1");
-        textArea.setLabel("Text area");
-        textArea.setWidth("100%");
+        messageField.setLabel("Message");
+        messageField.setWidth("100%");
         layoutRow3.addClassName(Gap.MEDIUM);
         layoutRow3.setWidth("100%");
         layoutRow3.getStyle().set("flex-grow", "1");
-        buttonPrimary.setText("Send");
-        buttonPrimary.setWidth("min-content");
-        buttonPrimary.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
-        buttonSecondary.setText("Cancel");
-        buttonSecondary.setWidth("min-content");
+        sendButton.setText("Send");
+        sendButton.setId("sendButton");
+        sendButton.setWidth("min-content");
+        sendButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
+        sendButton.addClickListener(event -> handleSubmit());
+
         getContent().add(layoutColumn2);
         layoutColumn2.add(h3);
         layoutColumn2.add(layoutRow);
-        layoutRow.add(textField);
+        layoutRow.add(nameField);
         layoutColumn2.add(layoutRow2);
         layoutRow2.add(emailField);
-        layoutColumn2.add(textArea);
+        layoutColumn2.add(messageField);
         layoutColumn2.add(layoutRow3);
-        layoutRow3.add(buttonPrimary);
-        layoutRow3.add(buttonSecondary);
+        layoutRow3.add(sendButton);
+
+    }
+
+    private void handleSubmit() {
+        boolean isValid = true;
+
+        if (nameField.isEmpty()) {
+            nameField.setInvalid(true);
+            isValid = false;
+        } else {
+            nameField.setInvalid(false);
+        }
+
+        if (emailField.isEmpty() || !emailField.getValue().contains("@")) {
+            emailField.setInvalid(true);
+            isValid = false;
+        } else {
+            emailField.setInvalid(false);
+        }
+
+        if (messageField.isEmpty()) {
+            messageField.setInvalid(true);
+            isValid = false;
+        } else {
+            messageField.setInvalid(false);
+        }
+
+        if (isValid) {
+            // Process the form submission
+            String name = nameField.getValue();
+            String email = emailField.getValue();
+            String message = messageField.getValue();
+
+            System.out.println("Name: " + name);
+            System.out.println("Email: " + email);
+            System.out.println("Message: " + message);
+
+            nameField.clear();
+            emailField.clear();
+            messageField.clear();
+
+            nameField.setInvalid(false);
+            emailField.setInvalid(false);
+            messageField.setInvalid(false);
+
+            // Show a success notification
+            Notification.show("Message sent successfully!", 30000, Notification.Position.TOP_CENTER);
+        }
     }
 }
